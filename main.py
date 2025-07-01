@@ -1,250 +1,3 @@
-# from flask import Flask, render_template_string, request, redirect, url_for, send_file
-# import csv
-# import os
-# from io import StringIO
-# from pathlib import Path
-# import requests
-
-# app = Flask(__name__)
-
-# OLLAMA_URL = "http://localhost:11434/api/generate"  # Ollama endpoint
-# MODEL = "codegemma"
-# CSV_FILE = "test_scenarios.csv"
-# SCRIPT_DIR = Path("test_scripts")
-# SCRIPT_DIR.mkdir(exist_ok=True)
-
-# # Function to call Ollama + CodeGemma for test scenario generation
-# def generate_test_scenarios(area, count):
-#     prompt = f"""
-# Generate {count} UI test scenarios for the Windows Spotify application in the area of '{area}'.
-# Provide each scenario as a line in the format: Description of the scenario.
-# """
-
-#     response = requests.post(OLLAMA_URL, json={
-#         "model": MODEL,
-#         "prompt": prompt,
-#         "stream": False
-#     })
-
-#     if response.status_code != 200:
-#         scenarios = [{
-#             "Test Case ID": "TC_ERROR",
-#             "Area": area,
-#             "Description": f"Failed to generate test cases: {response.text}"
-#         }]
-#     else:
-#         text = response.json().get("response", "")
-#         lines = [line.strip("- ") for line in text.strip().split("\n") if line.strip()]
-#         scenarios = [
-#             {
-#                 "Test Case ID": f"TC_{i+1}",
-#                 "Area": area,
-#                 "Description": line
-#             } for i, line in enumerate(lines[:int(count)])
-#         ]
-
-#     # Save to CSV file
-#     with open(CSV_FILE, 'w', newline='') as f:
-#         writer = csv.DictWriter(f, fieldnames=["Test Case ID", "Area", "Description"])
-#         writer.writeheader()
-#         writer.writerows(scenarios)
-
-#     return scenarios
-
-# def generate_test_script(description):
-#     return f"""
-# from pywinauto import Application
-
-# # Test Script: {description}
-# def test_spotify_scenario():
-#     app = Application(backend='uia').start('Spotify.exe')
-#     # Add steps based on: {description}
-#     pass
-# """
-
-# @app.route('/', methods=['GET', 'POST'])
-# def index():
-#     if request.method == 'POST':
-#         area = request.form['area']
-#         count = request.form['count']
-#         generate_test_scenarios(area, count)
-#         return redirect(url_for('generate_scripts'))
-
-#     return render_template_string('''
-#         <h2>LLM Test Scenario Generator</h2>
-#         <form method="post">
-#             Area for testing: <input type="text" name="area" required><br>
-#             Number of test cases: <input type="number" name="count" required><br>
-#             <input type="submit" value="Generate Test Scenarios">
-#         </form>
-#     ''')
-
-# @app.route('/generate-scripts')
-# def generate_scripts():
-#     if not os.path.exists(CSV_FILE):
-#         return "No test scenarios found."
-
-#     with open(CSV_FILE, newline='') as f:
-#         reader = csv.DictReader(f)
-#         for row in reader:
-#             script_content = generate_test_script(row['Description'])
-#             script_file = SCRIPT_DIR / f"{row['Test Case ID']}.py"
-#             with open(script_file, 'w') as sf:
-#                 sf.write(script_content)
-
-#     return redirect(url_for('review_scripts'))
-
-# @app.route('/review-scripts')
-# def review_scripts():
-#     script_links = [f'<li><a href="/edit/{script.name}">{script.name}</a></li>' for script in SCRIPT_DIR.glob("*.py")]
-#     return f"<h2>Review Test Scripts</h2><ul>{''.join(script_links)}</ul>"
-
-# @app.route('/edit/<filename>', methods=['GET', 'POST'])
-# def edit_script(filename):
-#     script_path = SCRIPT_DIR / filename
-#     if request.method == 'POST':
-#         with open(script_path, 'w') as f:
-#             f.write(request.form['content'])
-#         return redirect(url_for('review_scripts'))
-
-#     content = open(script_path).read()
-#     return render_template_string('''
-#         <h2>Editing {{filename}}</h2>
-#         <form method="post">
-#             <textarea name="content" rows="20" cols="80">{{content}}</textarea><br>
-#             <input type="submit" value="Save">
-#         </form>
-#     ''', filename=filename, content=content)
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-# from flask import Flask, render_template_string, request, redirect, url_for, send_file
-# import csv
-# import os
-# from io import StringIO
-# from pathlib import Path
-# import requests
-
-# app = Flask(__name__)
-
-# OLLAMA_URL = "http://localhost:11434/api/generate"  # Ollama endpoint
-# MODEL = "codegemma"
-# CSV_FILE = "test_scenarios.csv"
-# SCRIPT_DIR = Path("test_scripts")
-# SCRIPT_DIR.mkdir(exist_ok=True)
-# COMBINED_SCRIPT_FILE = SCRIPT_DIR / "spotify_test_suite.py"
-
-# # Function to call Ollama + CodeGemma for test scenario generation
-# def generate_test_scenarios(area, count):
-#     prompt = f"""
-# Generate {count} UI test scenarios for the Windows Spotify application in the area of '{area}'.
-# Provide each scenario as a line in the format: Description of the scenario.
-# """
-
-#     response = requests.post(OLLAMA_URL, json={
-#         "model": MODEL,
-#         "prompt": prompt,
-#         "stream": False
-#     })
-
-#     if response.status_code != 200:
-#         scenarios = [{
-#             "Test Case ID": "TC_ERROR",
-#             "Area": area,
-#             "Description": f"Failed to generate test cases: {response.text}"
-#         }]
-#     else:
-#         text = response.json().get("response", "")
-#         lines = [line.strip("- ") for line in text.strip().split("\n") if line.strip()]
-#         scenarios = [
-#             {
-#                 "Test Case ID": f"TC_{i+1}",
-#                 "Area": area,
-#                 "Description": line
-#             } for i, line in enumerate(lines[:int(count)])
-#         ]
-
-#     # Save to CSV file
-#     with open(CSV_FILE, 'w', newline='') as f:
-#         writer = csv.DictWriter(f, fieldnames=["Test Case ID", "Area", "Description"])
-#         writer.writeheader()
-#         writer.writerows(scenarios)
-
-#     return scenarios
-
-# # New: Function to manually generate test scripts using LLM prompt
-# def generate_combined_script(scenarios):
-#     prompt = """Generate Python test functions using pywinauto for the following Spotify test scenarios. Each function should be named using the test case ID and include the steps as Python code. Hardcode the Spotify path as 'C:\\Users\\palla\\AppData\\Local\\Microsoft\\WindowsApps\\Spotify.exe'.
-
-# """
-#     for scenario in scenarios:
-#         prompt += f"{scenario['Test Case ID']}: {scenario['Description']}\n"
-
-#     response = requests.post(OLLAMA_URL, json={
-#         "model": MODEL,
-#         "prompt": prompt,
-#         "stream": False
-#     })
-
-#     if response.status_code != 200:
-#         script_content = f"""# Failed to generate test scripts:\n# {response.text}"""
-#     else:
-#         script_body = response.json().get("response", "")
-#         script_content = f"from pywinauto import Application\n\n# Combined Spotify Test Suite\n\n{script_body}"
-
-#     with open(COMBINED_SCRIPT_FILE, 'w') as f:
-#         f.write(script_content)
-
-# @app.route('/', methods=['GET', 'POST'])
-# def index():
-#     if request.method == 'POST':
-#         area = request.form['area']
-#         count = request.form['count']
-#         generate_test_scenarios(area, count)
-#         return redirect(url_for('generate_scripts'))
-
-#     return render_template_string('''
-#         <h2>LLM Test Scenario Generator</h2>
-#         <form method="post">
-#             Area for testing: <input type="text" name="area" required><br>
-#             Number of test cases: <input type="number" name="count" required><br>
-#             <input type="submit" value="Generate Test Scenarios">
-#         </form>
-#     ''')
-
-# @app.route('/generate-scripts')
-# def generate_scripts():
-#     if not os.path.exists(CSV_FILE):
-#         return "No test scenarios found."
-
-#     with open(CSV_FILE, newline='') as f:
-#         reader = csv.DictReader(f)
-#         scenarios = list(reader)
-
-#     generate_combined_script(scenarios)
-#     return redirect(url_for('edit_combined_script'))
-
-# @app.route('/edit-combined-script', methods=['GET', 'POST'])
-# def edit_combined_script():
-#     if request.method == 'POST':
-#         with open(COMBINED_SCRIPT_FILE, 'w') as f:
-#             f.write(request.form['content'])
-#         return redirect(url_for('edit_combined_script'))
-
-#     content = open(COMBINED_SCRIPT_FILE).read() if COMBINED_SCRIPT_FILE.exists() else ""
-#     return render_template_string('''
-#         <h2>Editing Combined Spotify Test Suite</h2>
-#         <form method="post">
-#             <textarea name="content" rows="30" cols="100">{{content}}</textarea><br>
-#             <input type="submit" value="Save">
-#         </form>
-#     ''', content=content)
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-
 from flask import Flask, render_template_string, request, redirect, url_for, send_file
 import csv
 import os
@@ -255,7 +8,7 @@ import requests
 app = Flask(__name__)
 
 OLLAMA_URL = "http://localhost:11434/api/generate"  # Ollama endpoint
-MODEL = "codegemma"
+MODEL = "mistral:latest"
 CSV_FILE = "test_scenarios.csv"
 SCRIPT_DIR = Path("test_scripts")
 SCRIPT_DIR.mkdir(exist_ok=True)
@@ -264,9 +17,26 @@ COMBINED_SCRIPT_FILE = SCRIPT_DIR / "spotify_test_suite.py"
 # Function to call Ollama + CodeGemma for test scenario generation
 def generate_test_scenarios(area, count):
     prompt = f"""
-Generate {count} UI test scenarios for the Windows Spotify application in the area of '{area}'.
-Provide each scenario as a line in the format: Description of the scenario.
-"""
+        You are a QA engineer automating the UI testing of the **Spotify Windows Desktop application**.
+
+        Generate exactly **{count} unique and meaningful test scenarios** focused on the **'{area}'** functionality.
+
+        🧠 Assume real-world usage. Be creative and comprehensive.
+
+        📝 Format: Each line should be a single test scenario, phrased as a full sentence in imperative form.
+
+        Example:
+        - "Verify that a user can search for a song using the search bar and press Enter to navigate to the result."
+        - "Ensure that clicking the Play button starts the currently selected track."
+
+        ✅ Rules:
+        - Scenarios should **simulate end-user behavior** using only keyboard-based actions.
+        - Avoid duplicating ideas or actions across scenarios.
+        - Make sure each test is **clear, distinct, and practically automatable**.
+
+        Only output the test scenarios — no headings, no explanations.
+    """
+
 
     response = requests.post(OLLAMA_URL, json={
         "model": MODEL,
@@ -395,13 +165,53 @@ def index():
         return redirect(url_for('generate_scripts'))
 
     return render_template_string('''
-        <h2>LLM Test Scenario Generator</h2>
-        <form method="post">
-            Area for testing: <input type="text" name="area" required><br>
-            Number of test cases: <input type="number" name="count" required><br>
-            <input type="submit" value="Generate Test Scenarios">
-        </form>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>LLM Test Scenario Generator</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; background-color: #f7f9fc; }
+                h2 { color: #2c3e50; }
+                form {
+                    background-color: #fff;
+                    padding: 25px;
+                    border-radius: 10px;
+                    max-width: 500px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                input[type="text"], input[type="number"] {
+                    width: 95%;
+                    padding: 10px;
+                    margin: 12px 0;
+                    border-radius: 5px;
+                    border: 1px solid #ccc;
+                }
+                input[type="submit"] {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                input[type="submit"]:hover {
+                    background-color: #45a049;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>🎯 LLM Test Scenario Generator</h2>
+            <form method="post">
+                <label>🧪 Area for Testing:</label><br>
+                <input type="text" name="area" required><br>
+                <label>📋 Number of Test Cases:</label><br>
+                <input type="number" name="count" required><br>
+                <input type="submit" value="🚀 Generate Test Scenarios">
+            </form>
+        </body>
+        </html>
     ''')
+
 
 @app.route('/generate-scripts')
 def generate_scripts():
