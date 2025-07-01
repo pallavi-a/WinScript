@@ -1,0 +1,4 @@
+Test Case ID,Area,Description
+TC_1,"viewing playlist, searching for a song, get artist",1. Verify that the user can browse and view a list of their playlists.
+TC_2,"viewing playlist, searching for a song, get artist",2. Search for a specific song by title and verify that the song is displayed in the results.
+TC_3,"viewing playlist, searching for a song, get artist",3. Find an artist by name and confirm that the artist's albums and top tracks are displayed.
