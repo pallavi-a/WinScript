@@ -275,7 +275,7 @@ def push_to_git():
         remote_name = "origin"
 
         # Optional: configure remote if not already done
-        remote_url = "https://github.com/pallavi-a/WinScript.git"
+        remote_url = "github.com/pallavi-a/WinScript.git"
 
         # Check if .git exists
         if not (repo_path / ".git").exists():
