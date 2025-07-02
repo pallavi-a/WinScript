@@ -1,165 +1,39 @@
-from pywinauto.application import Application
+import pyautogui
+import time
+import pygetwindow as gw
+import subprocess
+import os
 
+def launch_spotify(spotify_path):
+    if not any("Spotify" in w.title for w in gw.getWindowsWithTitle("Spotify")):
+        print("Launching Spotify...")
+        subprocess.Popen(spotify_path)
+        time.sleep(5)  # Wait for Spotify to launch
 
-
-from pywinauto.keyboard import send_keys
-
-
-
-import pyautogui, pytest, time
-
-
-
-#random 101
-
-
-
-SPOTIFY_PATH = r"C:\Users\palla\AppData\Local\Microsoft\WindowsApps\Spotify.exe"
-
-
-
-
-
-
-
-def connect_spotify():
-
-
-
+def focus_spotify_window():
     try:
-
-
-
-        app = Application(backend="uia").connect(title_re="Spotify.*", timeout=10)
-
-
-
-        win = app.window(title_re="Spotify.*")
-
-
-
-        print(f"[UIA] Window exists: {win.exists()} | visible: {win.is_visible()}")
-
-
-
-        return app
-
-
-
-    except Exception as e:
-
-
-
-        print(f"[UIA] connect failed: {e}")
-
-
-
-        try:
-
-
-
-            app = Application(backend="win32").connect(title_re="Spotify.*", timeout=10)
-
-
-
-            win = app.window(title_re="Spotify.*")
-
-
-
-            print(f"[Win32] Window exists: {win.exists()} | visible: {win.is_visible()}")
-
-
-
-            return app
-
-
-
-        except Exception as e2:
-
-
-
-            print(f"[Win32] connect failed: {e2}")
-
-
-
-            return Application(backend="uia").start(SPOTIFY_PATH)
-
-
-
-
-
-
-
-@pytest.fixture(scope="session")
-
-
-
-def spotify_app():
-
-
-
-    app = connect_spotify()
-
-
-
-    time.sleep(5)
-
-
-
-    return app.window(title_re="Spotify.*")
-
-
-
-
-
-
-
-def test_search_song(spotify_app):
-
-
-
-    # Bring Spotify window to focus
-
-
-
-    spotify_app.set_focus()
-
-
-
-
-
-
-
-    # Move mouse to search box coordinates and click
-
-
-
-    pyautogui.moveTo(700, 40)
-
-
-
-    pyautogui.click()
-
-
-
-
-
-
-
-    # Type "Imagine Dragons" and press Enter
-
-
-
-    send_keys("Imagine Dragons" + Keys.ENTER)
-
-
-
-
-
-
-
-    # Assert success
-
-
-
-    assert True
+        window = gw.getWindowsWithTitle("Spotify")[0]
+        if window:
+            window.activate()
+            time.sleep(1)
+            return True
+    except IndexError:
+        print("Spotify window not found.")
+    return False
+
+def search_song(search_box_coords, song_name, spotify_path):
+    launch_spotify(spotify_path)
+    if focus_spotify_window():
+        pyautogui.moveTo(search_box_coords[0], search_box_coords[1], duration=0.5)
+        pyautogui.click()
+        time.sleep(0.5)
+        pyautogui.write(song_name, interval=0.1)
+        pyautogui.press('enter')
+        print(f"Searched for: {song_name}")
+    else:
+        print("Could not focus Spotify window.")
+
+# Example usage
+spotify_path = r"C:\\Users\\palla\\AppData\\Local\\Microsoft\\WindowsApps\\Spotify.exe"  # Replace with actual path
+search_box_coords = (700, 40)  # Replace with actual coordinates
+search_song(search_box_coords, "Bohemian Rhapsody", spotify_path)
