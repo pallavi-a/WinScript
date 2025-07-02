@@ -270,12 +270,12 @@ def edit_combined_script():
 @app.route('/push-to-git')
 def push_to_git():
     try:
-        repo_path = SCRIPT_DIR.resolve()  # Your local Git repo path
+        repo_path = "https://github.com/pallavi-a/WinScript.git/"  # Your local Git repo path
         branch = "master"  # Change to "master" or your branch name if needed
         remote_name = "origin"
 
         # Optional: configure remote if not already done
-        remote_url = "github.com/pallavi-a/WinScript.git"
+        remote_url = "https://github.com/pallavi-a/WinScript.git"
 
         # Check if .git exists
         if not (repo_path / ".git").exists():
