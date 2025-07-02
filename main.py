@@ -318,7 +318,7 @@ def edit_combined_script():
 @app.route('/push-to-git')
 def push_to_git():
     repo_path = SCRIPT_DIR.resolve()
-    branch     = "main"                          # or "main"
+    branch     = "testing_git"                          # or "main"
     remote     = "origin"
     remote_url = "https://github.com/pallavi-a/WinScript.git"  # CHANGE
 
