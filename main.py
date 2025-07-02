@@ -272,7 +272,7 @@ def push_to_git():
     repo_path = SCRIPT_DIR.resolve()
     branch     = "master"                          # or "main"
     remote     = "origin"
-    remote_url = "https://github.com/<YOUR-USERNAME>/WinScript.git"  # CHANGE
+    remote_url = "https://github.com/pallavi-a/WinScript.git"  # CHANGE
 
     try:
         # init repo if missing
