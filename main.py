@@ -9,7 +9,7 @@ import subprocess
 app = Flask(__name__)
 
 OLLAMA_URL = "http://localhost:11434/api/generate"  # Ollama endpoint
-MODEL = "mistral:latest"
+MODEL = "codegemma:latest"
 CSV_FILE = "test_scenarios.csv"
 SCRIPT_DIR = Path("test_scripts")
 SCRIPT_DIR.mkdir(exist_ok=True)
@@ -318,7 +318,7 @@ def edit_combined_script():
 @app.route('/push-to-git')
 def push_to_git():
     repo_path = SCRIPT_DIR.resolve()
-    branch     = "main"                          # or "main"
+    branch     = "master"                          # or "main"
     remote     = "origin"
     remote_url = "https://github.com/pallavi-a/WinScript.git"  # CHANGE
 
