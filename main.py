@@ -269,28 +269,35 @@ def edit_combined_script():
 
 @app.route('/push-to-git')
 def push_to_git():
-    try:
-        repo_path = SCRIPT_DIR.resolve()  # Your local Git repo path
-        branch = "master"  # Change to "master" or your branch name if needed
-        remote_name = "origin"
-        print('repo path=', repo_path)
-        # Optional: configure remote if not already done
-        remote_url = "github.com/Rugant9/WinScript.git"
+    repo_path = SCRIPT_DIR.resolve()
+    branch     = "master"                          # or "main"
+    remote     = "origin"
+    remote_url = "https://github.com/<YOUR-USERNAME>/WinScript.git"  # CHANGE
 
-        # Check if .git exists
+    try:
+        # init repo if missing
         if not (repo_path / ".git").exists():
             subprocess.run(["git", "init"], cwd=repo_path, check=True)
-            subprocess.run(["git", "remote", "add", remote_name, remote_url], cwd=repo_path, check=True)
 
-        # Add, commit, and push
+        # set or correct the remote URL (over-writes bad ones)
+        subprocess.run(["git", "remote", "remove", remote], cwd=repo_path, check=False)
+        subprocess.run(["git", "remote", "add", remote, remote_url], cwd=repo_path, check=True)
+
+        # commit latest changes
         subprocess.run(["git", "add", COMBINED_SCRIPT_FILE.name], cwd=repo_path, check=True)
         subprocess.run(["git", "commit", "-m", "Update Spotify test suite"], cwd=repo_path, check=True)
-        subprocess.run(["git", "push", remote_name, branch], cwd=repo_path, check=True)
 
-        return f"<h3>✅ Pushed to {remote_url} on branch <code>{branch}</code>.</h3><a href='/edit-combined-script'>← Back</a>"
+        # first push uses -u to create origin/<branch> if it doesn’t exist
+        subprocess.run(["git", "push", "-u", remote, branch], cwd=repo_path, check=True)
+
+        return (f"<h3>✅ Pushed to <code>{remote_url}</code> "
+                f"on branch <code>{branch}</code>.</h3>"
+                "<a href='/edit-combined-script'>← Back</a>")
 
     except subprocess.CalledProcessError as e:
-        return f"<h3>❌ Git error:</h3><pre>{e}</pre><a href='/edit-combined-script'>← Back</a>"
+        return (f"<h3>❌ Git error:</h3><pre>{e}</pre>"
+                "<a href='/edit-combined-script'>← Back</a>")
+
 
 
 if __name__ == '__main__':
