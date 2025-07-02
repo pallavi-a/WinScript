@@ -4,6 +4,7 @@ import os
 from io import StringIO
 from pathlib import Path
 import requests
+import subprocess
 
 app = Flask(__name__)
 
@@ -234,12 +235,63 @@ def edit_combined_script():
 
     content = open(COMBINED_SCRIPT_FILE).read() if COMBINED_SCRIPT_FILE.exists() else ""
     return render_template_string('''
-        <h2>Editing Combined Spotify Test Suite</h2>
-        <form method="post">
-            <textarea name="content" rows="30" cols="100">{{content}}</textarea><br>
-            <input type="submit" value="Save">
-        </form>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Edit Test Suite</title>
+            <style>
+                body { font-family: Arial; margin: 40px; background-color: #f2f2f2; }
+                textarea { width: 100%; height: 500px; padding: 10px; font-family: monospace; font-size: 14px; }
+                input[type="submit"], .push-button {
+                    padding: 10px 20px;
+                    margin-top: 10px;
+                    font-size: 16px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                input[type="submit"] { background-color: #4CAF50; color: white; }
+                .push-button { background-color: #007bff; color: white; text-decoration: none; display: inline-block; }
+                .push-button:hover { background-color: #0056b3; }
+            </style>
+        </head>
+        <body>
+            <h2>🛠️ Editing Combined Spotify Test Suite</h2>
+            <form method="post">
+                <textarea name="content">{{content}}</textarea><br>
+                <input type="submit" value="💾 Save">
+            </form>
+            <br>
+            <a href="{{ url_for('push_to_git') }}" class="push-button">🚀 Push to Git</a>
+        </body>
+        </html>
     ''', content=content)
+
+@app.route('/push-to-git')
+def push_to_git():
+    try:
+        repo_path = SCRIPT_DIR.resolve()  # Your local Git repo path
+        branch = "master"  # Change to "master" or your branch name if needed
+        remote_name = "origin"
+
+        # Optional: configure remote if not already done
+        remote_url = "https://github.com/pallavi-a/WinScript.git"
+
+        # Check if .git exists
+        if not (repo_path / ".git").exists():
+            subprocess.run(["git", "init"], cwd=repo_path, check=True)
+            subprocess.run(["git", "remote", "add", remote_name, remote_url], cwd=repo_path, check=True)
+
+        # Add, commit, and push
+        subprocess.run(["git", "add", COMBINED_SCRIPT_FILE.name], cwd=repo_path, check=True)
+        subprocess.run(["git", "commit", "-m", "Update Spotify test suite"], cwd=repo_path, check=True)
+        subprocess.run(["git", "push", remote_name, branch], cwd=repo_path, check=True)
+
+        return f"<h3>✅ Pushed to {remote_url} on branch <code>{branch}</code>.</h3><a href='/edit-combined-script'>← Back</a>"
+
+    except subprocess.CalledProcessError as e:
+        return f"<h3>❌ Git error:</h3><pre>{e}</pre><a href='/edit-combined-script'>← Back</a>"
+
 
 if __name__ == '__main__':
     app.run(debug=True)
